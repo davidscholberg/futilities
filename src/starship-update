@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+set -e
+
+starship_tarball="starship-x86_64-unknown-linux-musl.tar.gz"
+starship_url="https://github.com/starship/starship/releases/latest/download/$starship_tarball"
+
+cd "$(mktemp -d)"
+wget --no-verbose "$starship_url"
+tar xaf "$starship_tarball"
+rm "$starship_tarball"
+install -C -m 0555 starship ~/.local/bin
+rm starship
+echo "updated starship to latest version"

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+
+declare -a scripts=(
+    "starship-update"
+)
+
+dest_dir="$HOME/.local/bin"
+
+mkdir -p "$dest_dir"
+
+for script in "${scripts[@]}"; do
+    install -C -m 0555 "src/$script" "$dest_dir"
+done
