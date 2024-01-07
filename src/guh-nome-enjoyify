@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# Script to install my preferred Gnome extentions and tweak settings.
+
+set -e
+
+cd "$(mktemp -d)"
+
+# Install and enable official extensions.
+
+declare -a official_extensions=(
+    "dash-to-panel@jderose9.github.com"
+)
+
+for extension in "${official_extensions[@]}"; do
+    busctl --user \
+        call \
+        org.gnome.Shell.Extensions \
+        /org/gnome/Shell/Extensions \
+        org.gnome.Shell.Extensions \
+        InstallRemoteExtension \
+        s "$extension"
+    gnome-extensions enable "$extension"
+done
+
+# Install and enable unofficial extensions.
+
+(
+    git clone https://github.com/davidscholberg/guh-nome-enjoyment.git
+    cd guh-nome-enjoyment
+    ./scripts/install.sh
+    gnome-extensions enable guh-nome-enjoyment@davidscholberg.github.com
+)
+
+# Tweak some dconf settings.
+
+# Set dark color scheme.
+gsettings set org.gnome.desktop.interface color-scheme "'prefer-dark'"
+
+# Set idle delay of 10 minutes.
+gsettings set org.gnome.desktop.session idle-delay 600
+
+# Disable hot corner.
+gsettings set org.gnome.desktop.interface enable-hot-corners "false"
+
+# Change alt-tab to switch-windows rather than switch-applications.
+gsettings set org.gnome.desktop.wm.keybindings switch-applications "['<Super>Tab']"
+gsettings set org.gnome.desktop.wm.keybindings switch-windows "['<Alt>Tab']"
+
+# Tweak some Dash to Panel settings.
+dconf write /org/gnome/shell/extensions/dash-to-panel/dot-position "'BOTTOM'"
+dconf write /org/gnome/shell/extensions/dash-to-panel/dot-style-focused "'DOTS'"
+dconf write /org/gnome/shell/extensions/dash-to-panel/dot-style-unfocused "'DOTS'"
+dconf write /org/gnome/shell/extensions/dash-to-panel/focus-highlight-opacity 20
+if [ -f /usr/share/icons/hicolor/48x48/apps/fedora-logo-icon.png ]; then
+    dconf write \
+        /org/gnome/shell/extensions/dash-to-panel/show-apps-icon-file \
+        "'/usr/share/icons/hicolor/48x48/apps/fedora-logo-icon.png'"
+fi
+
+echo "Finished guh-nome enjoyification! Some changes will require a gnome restart."
