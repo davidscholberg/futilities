@@ -4,6 +4,7 @@ set -e
 
 declare -a scripts=(
     "guh-nome-enjoyify"
+    "neovim-update"
     "starship-update"
 )
 

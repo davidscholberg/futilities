@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+
+set -e
+
+neovim_appimage="nvim.appimage"
+neovim_sha="$neovim_appimage.sha256sum"
+neovim_base_url="https://github.com/neovim/neovim/releases/download/stable"
+neovim_appimage_url="$neovim_base_url/$neovim_appimage"
+neovim_sha_url="$neovim_base_url/$neovim_sha"
+
+cd "$(mktemp -d)"
+
+wget --no-verbose "$neovim_appimage_url"
+wget --no-verbose "$neovim_sha_url"
+
+sha256sum --check "$neovim_sha"
+
+mv "$neovim_appimage" nvim
+install -C -m 0555 nvim ~/.local/bin
+
+echo "updated neovim to latest version"
