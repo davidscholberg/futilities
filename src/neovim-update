@@ -2,7 +2,7 @@
 
 set -e
 
-neovim_appimage="nvim.appimage"
+neovim_appimage="nvim-linux-x86_64.appimage"
 neovim_sha="$neovim_appimage.sha256sum"
 neovim_base_url="https://github.com/neovim/neovim/releases/download/stable"
 neovim_appimage_url="$neovim_base_url/$neovim_appimage"
