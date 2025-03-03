@@ -3,6 +3,7 @@
 set -e
 
 declare -a scripts=(
+    "carbon-nightly-update"
     "guh-nome-enjoyify"
     "neovim-update"
     "starship-update"

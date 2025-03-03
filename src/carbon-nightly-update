@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+set -e
+
+carbon_version="$(date -d yesterday +0.0.0-0.nightly.%Y.%m.%d)"
+carbon_archive_dir="carbon_toolchain-${carbon_version}"
+carbon_archive="${carbon_archive_dir}.tar.gz"
+carbon_dest_dir="${HOME}/src/misc/carbon"
+
+mkdir -p "$carbon_dest_dir"
+cd "$carbon_dest_dir"
+
+wget "https://github.com/carbon-language/carbon-lang/releases/download/v${carbon_version}/${carbon_archive}"
+tar xvf "$carbon_archive"
+rm "$carbon_archive"
+
+ln -sf "${PWD}/${carbon_archive_dir}/bin/carbon" "${HOME}/.local/bin/"
