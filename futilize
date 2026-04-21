@@ -5,6 +5,7 @@ set -e
 declare -a scripts=(
     "carbon-nightly-update"
     "guh-nome-enjoyify"
+    "kpycli"
     "neovim-update"
     "starship-update"
 )

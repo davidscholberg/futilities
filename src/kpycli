@@ -1,0 +1,92 @@
+#!/usr/bin/env python3
+
+import sys
+import getpass
+import subprocess
+from pykeepass import PyKeePass
+
+def copy_to_xclip(text):
+    """Pipes text to the xclip clipboard selection."""
+    try:
+        process = subprocess.Popen(
+            ['xclip', '-selection', 'clipboard'],
+            stdin=subprocess.PIPE,
+            text=True
+        )
+        process.communicate(input=text)
+    except FileNotFoundError:
+        print("Error: 'xclip' not found.")
+
+def run_shell():
+    # 1. Grab filename from CLI args
+    if len(sys.argv) < 2:
+        print("Usage: python script.py <path_to_kdbx>")
+        sys.exit(1)
+
+    db_path = sys.argv[1]
+    password = getpass.getpass(f"Password for [{db_path}]: ")
+
+    try:
+        kp = PyKeePass(db_path, password=password)
+    except Exception as e:
+        print(f"Error: Could not open database. {e}")
+        return
+
+    current_group = kp.root_group
+
+    # 2. Interactive Loop
+    while True:
+        path_name = current_group.name if current_group.name else "Root"
+        try:
+            cmd_input = input(f"kp_shell:[{path_name}]> ").strip().split(maxsplit=1)
+        except EOFError: # Handles Ctrl+D gracefully
+            break
+
+        if not cmd_input:
+            continue
+
+        cmd = cmd_input[0].lower()
+        args = cmd_input[1] if len(cmd_input) > 1 else ""
+
+        # --- COMMAND: ls ---
+        if cmd == "ls":
+            for group in current_group.subgroups:
+                print(f"  [DIR]  {group.name}/")
+            for entry in current_group.entries:
+                print(f"  [ENT]  {entry.title}")
+
+        # --- COMMAND: cd ---
+        elif cmd == "cd":
+            if args == ".." or args == "-":
+                if current_group.parentgroup is not None:
+                    current_group = current_group.parentgroup
+            elif args == "/" or args == "~":
+                current_group = kp.root_group
+            else:
+                target = next((g for g in current_group.subgroups if g.name == args), None)
+                if target:
+                    current_group = target
+                else:
+                    print(f"Group '{args}' not found.")
+
+        # --- COMMAND: show ---
+        elif cmd == "show":
+            entry = next((e for e in current_group.entries if e.title == args), None)
+            if entry:
+                print(f"User: {entry.username}")
+                print(f"Pass: [Sent to xclip]")
+                copy_to_xclip(entry.password)
+            else:
+                print(f"Entry '{args}' not found.")
+
+        elif cmd in ["exit", "quit"]:
+            break
+        else:
+            print("Commands: ls, cd <group>, show <entry>, quit")
+
+if __name__ == "__main__":
+    try:
+        run_shell()
+    except KeyboardInterrupt:
+        print("\nExiting...")
+        sys.exit(0)
