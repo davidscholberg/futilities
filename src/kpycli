@@ -19,12 +19,13 @@ def copy_to_xclip(text):
 
 def run_shell():
     # 1. Grab filename from CLI args
+    script_name = sys.argv[0].rsplit("/", 1)[-1]
     if len(sys.argv) < 2:
-        print("Usage: python script.py <path_to_kdbx>")
+        print(f"Usage: {script_name} <path_to_kdbx>")
         sys.exit(1)
 
     db_path = sys.argv[1]
-    password = getpass.getpass(f"Password for [{db_path}]: ")
+    password = getpass.getpass(f"Password: ")
 
     try:
         kp = PyKeePass(db_path, password=password)
@@ -33,13 +34,14 @@ def run_shell():
         return
 
     current_group = kp.root_group
+    path_name = current_group.name if current_group.name else "Root"
 
     # 2. Interactive Loop
     while True:
-        path_name = current_group.name if current_group.name else "Root"
         try:
-            cmd_input = input(f"kp_shell:[{path_name}]> ").strip().split(maxsplit=1)
+            cmd_input = input(f"{script_name} {path_name} > ").strip().split(maxsplit=1)
         except EOFError: # Handles Ctrl+D gracefully
+            print("\nbyeeee...")
             break
 
         if not cmd_input:
@@ -51,21 +53,24 @@ def run_shell():
         # --- COMMAND: ls ---
         if cmd == "ls":
             for group in current_group.subgroups:
-                print(f"  [DIR]  {group.name}/")
+                print(f"  [group]  {group.name}/")
             for entry in current_group.entries:
-                print(f"  [ENT]  {entry.title}")
+                print(f"  [entry]  {entry.title}")
 
         # --- COMMAND: cd ---
         elif cmd == "cd":
-            if args == ".." or args == "-":
+            if args == "..":
                 if current_group.parentgroup is not None:
                     current_group = current_group.parentgroup
+                    path_name = path_name.rsplit("/", 1)[0]
             elif args == "/" or args == "~":
                 current_group = kp.root_group
+                path_name = current_group.name if current_group.name else "Root"
             else:
                 target = next((g for g in current_group.subgroups if g.name == args), None)
                 if target:
                     current_group = target
+                    path_name = path_name + "/" + current_group.name
                 else:
                     print(f"Group '{args}' not found.")
 
@@ -73,6 +78,7 @@ def run_shell():
         elif cmd == "show":
             entry = next((e for e in current_group.entries if e.title == args), None)
             if entry:
+                print(f"Url:  {entry.url}")
                 print(f"User: {entry.username}")
                 print(f"Pass: [Sent to xclip]")
                 copy_to_xclip(entry.password)
@@ -88,5 +94,5 @@ if __name__ == "__main__":
     try:
         run_shell()
     except KeyboardInterrupt:
-        print("\nExiting...")
+        print("\nbyeee...")
         sys.exit(0)
