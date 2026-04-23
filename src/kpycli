@@ -86,10 +86,22 @@ def run_shell():
             else:
                 print(f"Entry '{args}' not found.")
 
+        # --- COMMAND: showall ---
+        elif cmd == "showall":
+            entry = next((e for e in current_group.entries if e.title == args), None)
+            if entry:
+                print(f"Url:   {entry.url}")
+                print(f"User:  {entry.username}")
+                print(f"Pass:  [Sent to xclip]")
+                print(f"Notes:{("\n" + entry.notes) if entry.notes else ""}")
+                copy_to_xclip(entry.password)
+            else:
+                print(f"Entry '{args}' not found.")
+
         elif cmd in ["exit", "quit"]:
             break
         else:
-            print("Commands: ls, cd <group>, show <entry>, quit")
+            print("Commands: ls, cd <group>, show <entry>, showall <entry>, quit")
 
 if __name__ == "__main__":
     try:
