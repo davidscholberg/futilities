@@ -2,6 +2,7 @@
 
 import sys
 import getpass
+import readline
 import subprocess
 from pykeepass import PyKeePass
 
