@@ -53,9 +53,11 @@ def run_shell():
 
         # --- COMMAND: ls ---
         if cmd == "ls":
-            for group in current_group.subgroups:
+            sorted_subgroups = sorted(current_group.subgroups, key=lambda g: str.lower(g.name))
+            for group in sorted_subgroups:
                 print(f"  [group]  {group.name}/")
-            for entry in current_group.entries:
+            sorted_entries = sorted(current_group.entries, key=lambda e: str.lower(e.title))
+            for entry in sorted_entries:
                 print(f"  [entry]  {entry.title}")
 
         # --- COMMAND: cd ---
@@ -79,6 +81,7 @@ def run_shell():
         elif cmd == "show":
             entry = next((e for e in current_group.entries if e.title == args), None)
             if entry:
+                print(f"Name: {entry.title}")
                 print(f"Url:  {entry.url}")
                 print(f"User: {entry.username}")
                 print(f"Pass: [Sent to xclip]")
@@ -90,6 +93,7 @@ def run_shell():
         elif cmd == "showall":
             entry = next((e for e in current_group.entries if e.title == args), None)
             if entry:
+                print(f"Name:  {entry.title}")
                 print(f"Url:   {entry.url}")
                 print(f"User:  {entry.username}")
                 print(f"Pass:  [Sent to xclip]")
